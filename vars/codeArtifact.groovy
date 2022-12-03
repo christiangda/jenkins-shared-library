@@ -78,11 +78,15 @@ String login(String tool, String repository, String namespace='', Integer durati
   }
 
   optionsString = options.join(" ")
-  return sh(
-    returnStdout: true,
-    script: """
-      aws codeartifact login ${optionsString}
-      """).trim()
+
+  // this is used to mask any critical information
+  wrap([$class: 'MaskPasswordsBuildWrapper', varPasswordPairs: [[password: domain], [password: owner]]]) {
+    return sh(
+      returnStdout: true,
+      script: """
+        aws codeartifact login ${optionsString}
+        """).trim()
+  }
 }
 
 void setupNpmrc(String repository, String namespace='', Integer duration=900, String fileName='.npmrc') {
